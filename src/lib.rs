@@ -1,19 +1,5 @@
-use wasm_bindgen::prelude::*;
 use std::fmt;
-
-impl fmt::Display for Universe {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt:: Result {
-        for line in self.cells.as_slice().chunks(self.width as usize) {
-            for &cell in line {
-                let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
-                write!(f, "{}", symbol)?;
-            }
-            write!(f, "\n")?;
-        }
-
-        Ok(())
-    }
-}
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 #[repr(u8)] // Important to have, so that each cell us represented as single byte
@@ -27,36 +13,10 @@ pub enum Cell {
 pub struct Universe {
     width: u32,
     height: u32,
-    cells: Vec<Cell>
+    cells: Vec<Cell>,
 }
 
-/// Public methods, exported to JavaScript.
-#[wasm_bindgen]
 impl Universe {
-    pub fn tick(&mut self) {
-        let mut next = self.cells.clone();
-
-        for row in 0..self.height {
-            for col in 0..self.width {
-                let idx = self.get_index(row, col);
-                let cell = self.cells[idx];
-                let live_neigbhors = self.live_neighbor_count(row, col);
-
-                let next_cell = match (cell, live_neigbhors) {
-                    (Cell::Alive, x) if x < 2 => Cell::Dead,
-                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-                    (Cell::Alive, x) if x > 3 => Cell::Dead,
-                    (Cell::Dead, 2) => Cell::Alive,
-                    (otherwise, _) => otherwise,
-                };
-
-                next[idx] = next_cell;
-            }
-        }
-
-        self.cells = next;
-    }
-
     // Based on the formula:
     // index(row, column, universe) = row * width(universe) + column
     fn get_index(&self, row: u32, column: u32) -> usize {
@@ -80,10 +40,38 @@ impl Universe {
 
         count
     }
+}
+
+/// Public methods, exported to JavaScript.
+#[wasm_bindgen]
+impl Universe {
+    pub fn tick(&mut self) {
+        let mut next = self.cells.clone();
+
+        for row in 0..self.height {
+            for col in 0..self.width {
+                let idx = self.get_index(row, col);
+                let cell = self.cells[idx];
+                let live_neigbhors = self.live_neighbor_count(row, col);
+
+                let next_cell = match (cell, live_neigbhors) {
+                    (Cell::Alive, x) if x < 2 => Cell::Dead,
+                    (Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
+                    (Cell::Alive, x) if x > 3 => Cell::Dead,
+                    (Cell::Dead, 3) => Cell::Alive,
+                    (otherwise, _) => otherwise,
+                };
+
+                next[idx] = next_cell;
+            }
+        }
+
+        self.cells = next;
+    }
 
     pub fn new() -> Universe {
-        let width = 64;
-        let height = 64;
+        let width = 128;
+        let height = 128;
 
         let cells = (0..width * height)
             .map(|i| {
@@ -104,5 +92,19 @@ impl Universe {
 
     pub fn render(&self) -> String {
         self.to_string()
+    }
+}
+
+impl fmt::Display for Universe {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for line in self.cells.as_slice().chunks(self.width as usize) {
+            for &cell in line {
+                let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
+                write!(f, "{}", symbol)?;
+            }
+            write!(f, "\n")?;
+        }
+
+        Ok(())
     }
 }
