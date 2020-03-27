@@ -93,7 +93,9 @@ function initGame() {
     universe = Universe.new();
   } else {
     start.value = "true";
-    start.firstChild.data = "Reload Universe";
+    let attr = document.createAttribute("class")
+    attr.value = "fas fa-redo-alt";
+    start.setAttributeNode(attr);
     requestAnimationFrame(renderLoop);
   }
 }
