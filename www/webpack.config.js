@@ -12,7 +12,7 @@ module.exports = {
   plugins: [
     new WasmPackPlugin({
       crateDirectory: path.resolve(__dirname, "../"),
-      outDir: "pkg",
+      outDir: path.resolve(__dirname, "./pkg"),
       outName: "wasm_game_of_life"
     }),
   ],
