@@ -1,10 +1,10 @@
 import {
   Universe,
   Cell
-} from "wasm-game-of-life";
+} from "../pkg";
 import {
   memory
-} from "wasm-game-of-life/wasm_game_of_life_bg";
+} from "../pkg/wasm_game_of_life_bg";
 
 const CELL_SIZE = 5; // px
 const GRID_COLOR = "#CCCCCC";
